@@ -1,0 +1,21 @@
+{
+  "type": "service_account",
+  "project_id": "ehopital-3114f",
+  "private_key_id": "3ad0b391ca5391ea35093d975cd00df475731d36",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC0JsuLR4tGdZnS\ni8BfMlGUDfFGlHAi6PcQuFJ0yM5gBP/EqrzqxZDNMhkGPCFvFhGHSfDEJzPQ91L5\nPdlmd2oQUDLtDVP1yC+1mt3VYGwbyF1dUA5ZU2rn3P8RAKVVYh+k44a03s52mQVk\nuE6iZ0XMUh3jCZW8x8ktEGoEEvsRceQ58de6vPWCW+rGw+me5Uha/AAnL+ThLBlH\n/q3fALBubdTmhvaapFi/J+yo/yVTyh1HYmmoCqqy0yjDA8rN+XCBcfqILwPgNePt\nJb0R9GXOjF0dSTMWLwvB2WM8eBXq5zToCOzZYpW9cVNvkPZzieIsDVt+iAlFqKcJ\nW1C7hpAzAgMBAAECggEAMKMGsfgjUGcAm/jR+4GMx8GJ4cnCipJF3bQ9wrzSBtdi\nrBiCf4nOQa/kVKwYRLL7EYDzaSnCUgjr1FGP55uWvYfBcAF4qPMeelOwz2JEXa3X\nExHBhflA9A9Up6T6fhZLP8uTuzIqIJfIfnxJ8ouaKwMCgaC9VeXEWQ/E54uuT/Nx\nFajf8zTE9I1t73J/QNWR7tv7BlL/v2b/Du5WrFhiwRzM24GsFB4qlk0epLbGJTdi\n4p68TviQYbLbhHBgUf0/Ki4SDhPhGxHrAP5BmZVFn7AUtc1hAEqoHFV+2id31UGN\nq7QqSIYLETuTaFIqE6tPuNiozDD5PVcrQ7eA/BX53QKBgQDhvB0to5wwBJ8XenQt\ntBgUUnqyp+ec/yKF+Ygt7412934uPcDmDaOX5UrBaYDj/pugUkJolFDxfSUaUyB3\nUZj5y1lZz/8J/MdZwN6X/1vE60X5j/J/44XohXH8mwlV3WvX2L90eeYtFcneiwCc\nRtf8vA99rYx1Cy+vkwAhz3OOnwKBgQDMTiDclaU6o4CV6N6scDCoDtCMgr9KiDoy\nm1JP8pbD3wPg58bYP9Ltp0sQ38q5RwnAOqjIuAo1BzBZo/ge94DoROP6/n3BsXFF\n8pZ/F19o0LsB1xVzEhUW1iVG2SHOchdDfXBRjRCFv0syFBAvCBr/Zil3KfI4BdRz\nNOOgXKIZ7QKBgQCEZ9vRjlspyzwqAFivCijpmqt/qX7wlrKAVSpsj0uyEV+A7hX8\nmtlvWj4sDp9cnFZahoWPZBfKXjZqJ4Iumr0ZIA7L4HXfPNcNrVSjYVRJwBruVGHQ\nY/uCtOt0WNfz9omwNOGwB2Rc45/iGjSEdgVwqDqJ5EczzBjvalE0g8NrTwKBgQC3\nJ1NObNkzOGCOA7Wb4Pe9sYpEbPIQXw/NTnD8Ov3tmoBfn2kjdBQj+VXSSs3ySzzy\nl6O4TUTZRRiTQ+ur1zY5A4ld+cfDXM+vZUqFpO5jiLwdajRQdGVzk4bXfNBRwvYY\nCtwmP9AQFu3SdyoK/7k0POHvciszDgbnQQLPQDwSAQKBgQCb6nzyxaRZ4ysiLm+A\nOp0A0vRw/an9a2UUhBGPMXu1kpf7zaz6BcFIixrsTuUieK9cXw/3PsT578gBxcxG\nFvrIuEx37YHr0TZb0hAvyWSQIjn4ZAO1QbmBqFlTBI4MypQSCkc5AnjO4v+zndf4\nFappi66Y/TzDrt9pEiv7GUuqog==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-ngaqn@ehopital-3114f.iam.gserviceaccount.com",
+  "client_id": "118051490883801636566",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-ngaqn%40ehopital-3114f.iam.gserviceaccount.com",
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run lint"
+    ]
+  }
+}
