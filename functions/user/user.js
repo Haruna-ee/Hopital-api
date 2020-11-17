@@ -22,11 +22,51 @@ const {
 const { sendProfileDeletionWarning } = require("../mails/email");
 var router = require("express").Router();
 const new_line = "\n\xA0";
-const userMsg = "Swifter";
+const userMsg = "EHospit";
 
 async function users(req, res, next) {
   try {
     let query = db.collection("users");
+    let response = [];
+
+    await query.get().then((querySnapshot) => {
+      let docs = querySnapshot.docs; //result of the query
+
+      for (let doc of docs) {
+        const selectedItem = {
+          id: doc.id,
+          newuser: doc.data().newuser,
+          email: doc.data().email,
+          role: doc.data().role,
+          firstname: doc.data().firstname,
+          lastname: doc.data().lastname,
+          username: doc.data().username,
+          active: doc.data().active,
+          country: doc.data().country,
+          phone: doc.data().phone,
+          image: doc.data().image,
+          about: doc.data().about,
+          is_approved: doc.data().is_approved,
+        };
+
+        response.push(selectedItem);
+      }
+
+      return response; //each then should return a value
+    });
+
+    return res.status(200).send(response);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function medicals(req, res, next) {
+  try {
+    let doc = db.collection("users");
+
+    const query = doc.where("role", "!=", "patient");
+
     let response = [];
 
     await query.get().then((querySnapshot) => {
@@ -217,19 +257,23 @@ async function userUpdate(req, res, next) {
       updateObj.phone = req.body.phone;
     }
 
-    if (req.body.about) {
-      updateObj.about = req.body.about;
+    if (req.body.firstname) {
+      updateObj.firstname = req.body.firstname;
     }
 
-    if (req.body.country) {
-      updateObj.country = req.body.country;
+    if (req.body.username) {
+      updateObj.username = req.body.username;
+    }
+
+
+    if (req.body.lastname) {
+      updateObj.lastname = req.body.lastname;
     }
 
     if (req.body.image && req.body.path) {
       updateObj.image = req.body.image;
       updateObj.imagepath = req.body.path;
     }
-
 
     if (Object.keys(adminObj).length > 0) {
       await firebaseAdmin.auth().updateUser(`${id}`, adminObj);
@@ -330,6 +374,36 @@ async function userDelete(req, res, next) {
   }
 }
 
+async function userDeleteById(req, res, next) {
+  try {
+    if (!req.params.id) {
+      throw new ErrorHandler(401, "userDeleteById", "Missing parameter id.");
+    }
+    var id = req.params.id;
+
+    const document = db.collection("users").doc(`${id}`);
+
+    let userData = await document.get();
+    if (!userData.exists) {
+      throw new ErrorHandler(
+        401,
+        "userDeleteById",
+        "User with id not found.Invalid id"
+      );
+    }
+
+    await document.update({
+      active: false,
+    });
+
+    return res.status(200).send({
+      message: "User account deleted successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function reverseDelete(req, res, next) {
   try {
     if (!req.user.uid) {
@@ -371,42 +445,14 @@ async function reverseDelete(req, res, next) {
   }
 }
 
-async function refactor(req, res, next) {
-  try {
-    let query = db.collection("users");
-    let response = [];
-
-    await query.get().then((querySnapshot) => {
-      let docs = querySnapshot.docs; //result of the query
-
-      for (let doc of docs) {
-        const document = db.collection("users").doc(doc.id);
-        document.update({
-          giturl: null,
-          about: null,
-          step1: false,
-          step2: false,
-          step3: false,
-        });
-      }
-
-      return response; //each then should return a value
-    });
-
-    return res.status(200).send(response);
-  } catch (error) {
-    return next(error);
-  }
-}
-
-//router.get("/refactor", refactor);
-
 router.get("/users", [validateFirebaseIdToken], users);
+router.get("/medicals", medicals);
 router.get("/user", [validateFirebaseIdToken], user);
 router.get("/user/:id", getUserById);
 router.get("/usr/:username", userByUsername);
 router.put("/userupdate", [validateFirebaseIdToken], userUpdate);
 router.put("/userdelete", [validateFirebaseIdToken], userDelete);
 router.put("/reversedelete", [validateFirebaseIdToken], reverseDelete);
+router.delete("/userdelete/:id", [validateFirebaseIdToken], userDeleteById);
 
 module.exports = router;

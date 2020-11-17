@@ -71,15 +71,16 @@ async function createRequest(req, res, next) {
       );
     }
 
-    const document = db.collection("users").doc(req.body.user);
+    const document = db.collection("users").doc(req.body.email);
     let user = await document.get();
 
     if (!user.exists) {
-      throw new ErrorHandler(401, "Medical practitioner id not found");
+      throw new ErrorHandler(401, "User id not found");
     }
 
     const response = await db.collection("requests").add({
-      user: req.body.user,
+      user: user.data().user,
+      medical: req.body.user,
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
@@ -109,6 +110,7 @@ async function getRequest(req, res, next) {
 
     let response = {
       user: request.data().user,
+      medical: request.data().medical,
       name: request.data().name,
       email: request.data().email,
       phone: request.data().phone,
@@ -129,9 +131,8 @@ async function getRequest(req, res, next) {
   }
 }
 
-async function getAllRequests(req, res, next) {
+async function getAllPatientRequests(req, res, next) {
   try {
-
     // Create a reference to the cities collection
     const requestsRef = db.collection("requests");
 
@@ -147,6 +148,7 @@ async function getAllRequests(req, res, next) {
         const selectedItem = {
           id: doc.id,
           user: doc.data().user,
+          medical: doc.data().medical,
           name: doc.data().name,
           email: doc.data().email,
           phone: doc.data().phone,
@@ -175,7 +177,7 @@ async function getAllRequests(req, res, next) {
   }
 }
 
-async function updateRequest(req, res, next) {
+async function updateRequestByPatient(req, res, next) {
   try {
     if (!req.params.id) {
       throw new ErrorHandler(401, "updateRequest", "Missing parameter id");
@@ -186,16 +188,16 @@ async function updateRequest(req, res, next) {
     //check if user is the owner of skill to be updated
 
     const doc = db.collection("requests").doc(`${id}`);
-    let cert = await doc.get();
-    if (!cert.exists) {
+    let request = await doc.get();
+    if (!request.exists) {
       throw new ErrorHandler(
         401,
         "updateRequest",
-        "certificate with id does not exist"
+        "request with id does not exist"
       );
     }
 
-    let requestUsr = cert.data().user;
+    let requestUsr = request.data().user;
 
     if (requestUsr !== req.user.uid) {
       throw new ErrorHandler(
@@ -221,13 +223,15 @@ async function updateRequest(req, res, next) {
       updateObj.phone = req.body.phone;
     }
 
+    if (req.body.reason) {
+      updateObj.reason = req.body.reason;
+    }
+
     if (req.body.section) {
       updateObj.section = req.body.section;
     }
 
-    if (req.body.reason) {
-      updateObj.reason = req.body.reason;
-    }
+    updateObj.status = false;
 
     updateObj.updated = firebaseAdmin.firestore.FieldValue.serverTimestamp();
 
@@ -237,7 +241,87 @@ async function updateRequest(req, res, next) {
 
       let request = await doc.get();
       response = {
-        user: request.data().user,
+        user: req.user.uid,
+        name: request.data().name,
+        email: request.data().email,
+        phone: request.data().phone,
+        reason: request.data().reason,
+        section: request.data().section,
+        time: request.data().time,
+        requestcomment: request.data().requestcomment,
+        status: request.data().status,
+        created: request.data().created
+          ? request.data().created.toDate().toUTCString()
+          : null,
+        updated: request.data().updated
+          ? request.data().updated.toDate().toUTCString()
+          : null,
+      };
+    } else {
+      response = "No data passed:";
+    }
+
+    return res
+      .status(200)
+      .send({ message: "request updated succesfully", user: response });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateRequestByMed(req, res, next) {
+  try {
+    if (!req.params.id) {
+      throw new ErrorHandler(401, "updateRequest", "Missing parameter id");
+    }
+
+    var id = req.params.id;
+
+    //check if user is the owner of skill to be updated
+
+    const doc = db.collection("requests").doc(`${id}`);
+    let request = await doc.get();
+    if (!request.exists) {
+      throw new ErrorHandler(
+        401,
+        "updateRequest",
+        "request with id does not exist"
+      );
+    }
+
+    let requestUsr = request.data().user;
+
+    if (requestUsr !== req.user.uid) {
+      throw new ErrorHandler(
+        401,
+        "updateRequest",
+        "Unauthorized user: Let approproate user update request"
+      );
+    }
+
+    let response;
+    var updateObj = {};
+
+    //certocess obj
+    if (req.body.requestcomment) {
+      updateObj.requestcomment = req.body.requestcomment;
+    }
+
+    if (req.body.time) {
+      updateObj.time = req.body.time;
+    }
+
+    updateObj.status = true;
+
+    updateObj.updated = firebaseAdmin.firestore.FieldValue.serverTimestamp();
+
+    if (Object.keys(updateObj).length > 0) {
+      const doc = db.collection("requests").doc(`${id}`);
+      await doc.update(updateObj);
+
+      let request = await doc.get();
+      response = {
+        user: req.user.uid,
         name: request.data().name,
         email: request.data().email,
         phone: request.data().phone,
@@ -304,10 +388,15 @@ async function deleteRequest(req, res, next) {
   }
 }
 
-router.get("/requests", requests);
+router.get("/requests", [validateFirebaseIdToken], requests);
 router.get("/request/:id", getRequest);
-router.get("/usrrequests", [validateFirebaseIdToken], getAllRequests);
+router.get("/usrrequests", [validateFirebaseIdToken], getAllPatientRequests);
 router.post("/request", createRequest);
-router.put("/uprequest/:id", [validateFirebaseIdToken], updateRequest);
-router.delete("/drequest/:id", [validateFirebaseIdToken], deleteRequest);
+router.put("/uprequest/:id", [validateFirebaseIdToken], updateRequestByPatient);
+router.put(
+  "/uprequestbymed/:id",
+  [validateFirebaseIdToken],
+  updateRequestByMed
+);
+router.delete("/requestdelete/:id", [validateFirebaseIdToken], deleteRequest);
 module.exports = router;

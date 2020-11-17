@@ -31,6 +31,8 @@ app.use(require("./user/generic"));
 app.use(require("./user/favorite"));
 app.use(require("./user/feedback"));
 app.use(require("./user/request"));
+app.use(require("./user/userdrug"));
+app.use(require("./user/drug"));
 
 
 /********************************************************
