@@ -71,15 +71,7 @@ async function createRequest(req, res, next) {
       );
     }
 
-    const document = db.collection("users").doc(req.body.email);
-    let user = await document.get();
-
-    if (!user.exists) {
-      throw new ErrorHandler(401, "User id not found");
-    }
-
     const response = await db.collection("requests").add({
-      user: user.data().user,
       medical: req.body.user,
       name: req.body.name,
       email: req.body.email,
@@ -137,7 +129,7 @@ async function getAllPatientRequests(req, res, next) {
     const requestsRef = db.collection("requests");
 
     // Create a query against the collection
-    const queryRef = requestsRef.where("user", "==", req.user.uid);
+    const queryRef = requestsRef.where("email", "==", req.params.id);
 
     let response = [];
 
@@ -289,16 +281,6 @@ async function updateRequestByMed(req, res, next) {
       );
     }
 
-    let requestUsr = request.data().user;
-
-    if (requestUsr !== req.user.uid) {
-      throw new ErrorHandler(
-        401,
-        "updateRequest",
-        "Unauthorized user: Let approproate user update request"
-      );
-    }
-
     let response;
     var updateObj = {};
 
@@ -370,16 +352,6 @@ async function deleteRequest(req, res, next) {
       );
     }
 
-    let requestUsr = ed.data().user;
-
-    if (requestUsr !== req.user.uid) {
-      throw new ErrorHandler(
-        401,
-        "deleteRequest",
-        "Unauthorized user: Let appropirate user delete request"
-      );
-    }
-
     await doc.delete();
 
     return res.status(200).send({ message: "request deleted successfully" });
@@ -390,7 +362,7 @@ async function deleteRequest(req, res, next) {
 
 router.get("/requests", [validateFirebaseIdToken], requests);
 router.get("/request/:id", getRequest);
-router.get("/usrrequests", [validateFirebaseIdToken], getAllPatientRequests);
+router.get("/usrrequests/:id", [validateFirebaseIdToken], getAllPatientRequests);
 router.post("/request", createRequest);
 router.put("/uprequest/:id", [validateFirebaseIdToken], updateRequestByPatient);
 router.put(

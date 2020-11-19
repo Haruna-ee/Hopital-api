@@ -88,6 +88,48 @@ async function getAllUserDrugs(req, res, next) {
 }
 
 
+async function getAllUserDrugsMed(req, res, next) {
+  try {
+    // Create a reference to the cities collection
+    const drugsRef = db.collection("userdrugs");
+
+    // Create a query against the collection
+    const queryRef = drugsRef.where("user", "==", req.params.id);
+
+    let response = [];
+
+    await queryRef.get().then((querySnapshot) => {
+      let docs = querySnapshot.docs; //result of the query
+
+      for (let doc of docs) {
+        const selectedItem = {
+          id: doc.id,
+          user: doc.data().user,
+          drug: doc.data().drug,
+          prescription: doc.data().prescription,
+          medical: doc.data().medical,
+          created: doc.data().created
+            ? doc.data().created.toDate().toUTCString()
+            : null,
+          updated: doc.data().updated
+            ? doc.data().updated.toDate().toUTCString()
+            : null,
+        };
+
+        response.push(selectedItem);
+      }
+
+      return response; //each then should return a value
+    });
+
+    return res.status(200).send(response);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+
+
 async function deleteUserDrug(req, res, next) {
   try {
     if (!req.params.id) {
@@ -118,5 +160,6 @@ async function deleteUserDrug(req, res, next) {
 
 router.post("/usrdrug", [validateFirebaseIdToken], createUserDrug);
 router.get("/usrdrugs", [validateFirebaseIdToken], getAllUserDrugs);
+router.get("/usrdrugsmd/:id", [validateFirebaseIdToken], getAllUserDrugsMed);
 router.delete("/deleteusrdrug/:id", [validateFirebaseIdToken], deleteUserDrug);
 module.exports = router;
